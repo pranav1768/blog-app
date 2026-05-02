@@ -1,0 +1,12 @@
+.post-form { display: flex; flex-direction: column; gap: 1.3rem; max-width: 800px; }
+.form-label {
+  display: flex; flex-direction: column; gap: .4rem;
+  font-size: .9rem; font-weight: 500;
+}
+.post-form textarea { resize: vertical; min-height: 100px; }
+.publish-toggle {
+  display: flex; align-items: center; gap: .6rem;
+  font-size: .92rem; cursor: pointer;
+}
+.publish-toggle input { width: auto; }
+.form-actions { padding-top: .5rem; }
