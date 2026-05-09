@@ -30,7 +30,7 @@ function Layout() {
   return (
     <>
       <Navbar />
-      <main style={{ minHeight: 'calc(100vh - 140px)', paddingTop: '5rem' }}>
+      <main style={{ minHeight: 'calc(100vh - 140px)' }}>
         <Routes>
           <Route path="/"            element={<Home />} />
           <Route path="/posts/:slug" element={<PostDetail />} />

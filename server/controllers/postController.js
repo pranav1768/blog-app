@@ -90,3 +90,13 @@ exports.getMyPosts = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch posts' });
   }
 };
+
+exports.getPostForEdit = async (req, res) => {
+  try {
+    const post = await require('../models/Post').findById(req.params.id).populate('author', 'name email');
+    if (!post) return res.status(404).json({ error: 'Post not found' });
+    const isOwner = post.author._id.toString() === req.user._id.toString();
+    if (!isOwner && req.user.role !== 'admin') return res.status(403).json({ error: 'Forbidden' });
+    res.json({ post });
+  } catch { res.status(500).json({ error: 'Failed to fetch post' }); }
+};

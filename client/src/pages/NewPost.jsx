@@ -12,17 +12,12 @@ export default function NewPost() {
     try {
       const res = await api.post('/posts', data);
       navigate(`/posts/${res.data.post.slug}`);
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
   return (
-    <div className="page container" style={{ paddingTop: '2rem', paddingBottom: '4rem' }}>
-      <h1 style={{ fontFamily: 'var(--font-head)', fontSize: '2rem', marginBottom: '2rem' }}>
-        Write a new post
-      </h1>
-      <PostForm onSubmit={handleSubmit} loading={loading} />
+    <div className="page container post-form-page">
+      <PostForm onSubmit={handleSubmit} loading={loading} title="Write a new story" />
     </div>
   );
 }

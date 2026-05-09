@@ -1,73 +1,129 @@
 import { useState } from 'react';
 import './PostForm.css';
 
-export default function PostForm({ initial = {}, onSubmit, loading }) {
+export default function PostForm({ initial = {}, onSubmit, loading, title = 'Write a new story' }) {
   const [form, setForm] = useState({
-    title:       initial.title       || '',
-    content:     initial.content     || '',
-    excerpt:     initial.excerpt     || '',
-    coverImage:  initial.coverImage  || '',
-    tags:        initial.tags?.join(', ') || '',
-    published:   initial.published   ?? false,
+    title:      initial.title      || '',
+    content:    initial.content    || '',
+    excerpt:    initial.excerpt    || '',
+    coverImage: initial.coverImage || '',
+    tags:       initial.tags?.join(', ') || '',
+    published:  initial.published  ?? false,
   });
   const [error, setError] = useState('');
 
-  const set = (key) => (e) =>
-    setForm(f => ({ ...f, [key]: e.target.type === 'checkbox' ? e.target.checked : e.target.value }));
+  const set = k => e => setForm(f => ({ ...f, [k]: e.target.value }));
+  const toggle = () => setForm(f => ({ ...f, published: !f.published }));
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    const payload = {
-      ...form,
-      tags: form.tags.split(',').map(t => t.trim()).filter(Boolean),
-    };
+    e.preventDefault(); setError('');
     try {
-      await onSubmit(payload);
+      await onSubmit({
+        ...form,
+        tags: form.tags.split(',').map(t => t.trim()).filter(Boolean),
+      });
     } catch (err) {
-      setError(err.response?.data?.error || 'Something went wrong');
+      setError(err.response?.data?.error || 'Something went wrong.');
     }
   };
 
   return (
-    <form className="post-form" onSubmit={handleSubmit}>
-      <label className="form-label">Title *
-        <input type="text" required value={form.title} onChange={set('title')}
-          placeholder="Your post title…" />
-      </label>
-
-      <label className="form-label">Cover Image URL
-        <input type="url" value={form.coverImage} onChange={set('coverImage')}
-          placeholder="https://example.com/image.jpg" />
-      </label>
-
-      <label className="form-label">Tags
-        <input type="text" value={form.tags} onChange={set('tags')}
-          placeholder="technology, design, life (comma separated)" />
-      </label>
-
-      <label className="form-label">Excerpt
-        <textarea rows={2} value={form.excerpt} onChange={set('excerpt')}
-          placeholder="Short summary shown on cards (optional)" />
-      </label>
-
-      <label className="form-label">Content *
-        <textarea rows={16} required value={form.content} onChange={set('content')}
-          placeholder="Write your post here… HTML is supported." />
-      </label>
-
-      <label className="publish-toggle">
-        <input type="checkbox" checked={form.published} onChange={set('published')} />
-        <span>Publish immediately</span>
-      </label>
-
-      {error && <p className="error-msg">{error}</p>}
-
-      <div className="form-actions">
-        <button className="btn btn-primary" type="submit" disabled={loading}>
-          {loading ? 'Saving…' : 'Save Post'}
-        </button>
+    <div>
+      <div className="post-form-header">
+        <h1>{title}</h1>
+        <p>Compose · Draft · Publish</p>
       </div>
-    </form>
+
+      <form onSubmit={handleSubmit}>
+        <div className="post-form-layout">
+          {/* Main */}
+          <div className="post-form-main">
+            <div className="form-group">
+              <input
+                className="title-input"
+                type="text" required
+                value={form.title} onChange={set('title')}
+                placeholder="Story headline…"
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-lbl">Excerpt / Summary</label>
+              <textarea rows={2} value={form.excerpt} onChange={set('excerpt')}
+                placeholder="A short summary shown on the homepage cards (optional)…" />
+            </div>
+
+            <div className="form-group">
+              <label className="form-lbl">Body *</label>
+              <textarea rows={24} required value={form.content} onChange={set('content')}
+                placeholder="Write your story here… HTML is supported." />
+            </div>
+
+            {error && <p className="error-msg">{error}</p>}
+          </div>
+
+          {/* Sidebar */}
+          <div className="post-form-side">
+            {/* Publish card */}
+            <div className="side-card">
+              <div className="side-card-title">Publishing</div>
+              <div className="publish-row" onClick={toggle}>
+                <span className="publish-row-label">
+                  {form.published ? '✅ Publish' : '📋 Save as draft'}
+                </span>
+                <div className={`toggle-pill ${form.published ? 'on' : ''}`} />
+              </div>
+              <button
+                className="btn btn-primary"
+                type="submit"
+                disabled={loading}
+                style={{ width: '100%', justifyContent: 'center' }}
+              >
+                {loading ? 'Saving…' : form.published ? 'Publish Story' : 'Save Draft'}
+              </button>
+            </div>
+
+            {/* Details card */}
+            <div className="side-card">
+              <div className="side-card-title">Story Details</div>
+              <div className="form-group">
+                <label className="form-lbl">Tags (comma-separated)</label>
+                <input type="text" value={form.tags} onChange={set('tags')}
+                  placeholder="technology, design, life" />
+              </div>
+              <div className="form-group">
+                <label className="form-lbl">Cover Image URL</label>
+                <input type="url" value={form.coverImage} onChange={set('coverImage')}
+                  placeholder="https://…" />
+                {form.coverImage && (
+                  <img
+                    src={form.coverImage} alt="Cover preview"
+                    className="cover-preview"
+                    onError={e => e.target.style.display = 'none'}
+                  />
+                )}
+              </div>
+            </div>
+
+            {/* Tips card */}
+            <div className="side-card">
+              <div className="side-card-title">Tips</div>
+              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '.5rem' }}>
+                {[
+                  'Use HTML tags for formatting',
+                  '<h2> for section headings',
+                  '<blockquote> for pull quotes',
+                  '<strong> to emphasise key points',
+                ].map(t => (
+                  <li key={t} style={{ fontSize: '.78rem', color: 'var(--gray4)', display: 'flex', gap: '.4rem', alignItems: 'flex-start' }}>
+                    <span style={{ color: 'var(--red)', fontWeight: 700, marginTop: '.05rem' }}>·</span>{t}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
   );
 }
